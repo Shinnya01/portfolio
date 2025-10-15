@@ -48,10 +48,10 @@ const PORTFOLIO_DATA = {
   title: 'Full Stack Developer | PHP/Laravel & Next.js Ecosystems',
   bio: 'A passionate developer focused on robust full-stack solutions. Proficient in crafting scalable backends with PHP (Laravel/Livewire) and dynamic, type-safe frontends using Next.js, React, and TypeScript.',
   skills: [
-    { icon: <Code className="w-6 h-6 text-indigo-500" />, name: 'Frontend', details: 'React, Next.js, TypeScript, Tailwind CSS, Blade Templates' },
-    { icon: <Zap className="w-6 h-6 text-green-500" />, name: 'Backend/APIs', details: 'PHP, Laravel, Livewire, Express, RESTful API Design' },
-    { icon: <Globe className="w-6 h-6 text-red-500" />, name: 'Databases', details: 'PostgreSQL, MySQL, SQLite, Eloquent ORM' },
-    { icon: <Star className="w-6 h-6 text-yellow-500" />, name: 'Tools/Deployment', details: 'Git, Vercel, Composer, npm/yarn, Basic DevOps' },
+    { icon: <Code className="w-6 h-6 text-indigo-500" />, name: 'Frontend', details: 'Tailwind CSS, Blade Templates' },
+    { icon: <Zap className="w-6 h-6 text-green-500" />, name: 'Backend/APIs', details: 'PHP, Laravel, Livewire' },
+    { icon: <Globe className="w-6 h-6 text-red-500" />, name: 'Databases', details: 'MySQL, SQLite' },
+    { icon: <Star className="w-6 h-6 text-yellow-500" />, name: 'Tools/Deployment', details: 'Git, Vercel, Composer, npm/yarn' },
   ],
 };
 
