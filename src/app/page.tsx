@@ -45,7 +45,7 @@ const ARCHIVE_PROJECTS = ALL_PUBLIC_REPOS.slice(5);
 
 const PORTFOLIO_DATA = {
   name: 'Shinya',
-  title: 'Full Stack Developer | PHP/Laravel & Next.js Ecosystems',
+  title: 'Full Stack Developer | PHP/Laravel & Tailwind CSS',
   bio: 'A passionate developer focused on robust full-stack solutions. Proficient in crafting scalable backends with PHP (Laravel/Livewire).',
   skills: [
     { icon: <Code className="w-6 h-6 text-indigo-500" />, name: 'Frontend', details: 'Tailwind CSS, Blade Templates' },
