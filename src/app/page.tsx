@@ -1,366 +1,808 @@
-'use client';
+'use client'
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react'
 import {
+  ArrowRight,
+  BookOpen,
   Code,
-  Layers,
-  Briefcase,
   Github,
+  Globe,
   Linkedin,
   Mail,
   Menu,
-  X,
-  ArrowRight,
-  Zap,
-  Globe,
   Star,
-  BookOpen,
-} from 'lucide-react';
+  X,
+  Zap,
+} from 'lucide-react'
 
-// --- FULL PROJECT DATA ---
+type Repo = {
+  name: string
+  lang: string
+  description: string
+  tags: string[]
+  link: string
+  featured?: boolean
+}
 
-// Public Repositories, excluding the portfolio itself.
-const ALL_PUBLIC_REPOS = [
-    { name: 'simple-pos-system-php', lang: 'PHP', description: 'A practical, file-based Point of Sale (POS) system built with vanilla PHP and SQLite for managing inventory and tracking basic sales transactions.', tags: ['PHP', 'SQLite', 'Vanilla JS', 'POS'], link: 'https://github.com/Shinnya01/simple-pos-system-php' },
-    { name: 'dlchub-laravel-react', lang: 'TypeScript', description: 'A sophisticated full-stack application integrating a Laravel API backend with a dedicated React/TypeScript frontend for a dynamic, modern user experience.', tags: ['Laravel', 'React', 'TypeScript', 'Full Stack', 'API'], link: 'https://github.com/Shinnya01/dlchub-laravel-react' },
-    { name: '7task-react', lang: 'TypeScript', description: 'A reliable task management application demonstrating proficiency in TypeScript and the React ecosystem for building type-safe and scalable frontend logic.', tags: ['React', 'TypeScript', 'Task Management', 'Frontend'], link: 'https://github.com/Shinnya01/7task-react' },
-    { name: 'sarisaristore-livewire', lang: 'Blade', description: 'A prototype for a local store management system built using the Laravel Livewire and Blade ecosystem, showcasing real-time data binding and rapid development techniques.', tags: ['Laravel', 'Livewire', 'Blade', 'PHP', 'Store Management'], link: 'https://github.com/Shinnya01/sarisaristore-livewire' },
-    { name: 'dlc-archive', lang: 'Blade', description: 'Implementation of complex UI and data presentation using Laravel\'s Blade templating engine, focusing on efficient and maintainable views.', tags: ['Laravel', 'Blade', 'Front-End', 'Templating'], link: 'https://github.com/Shinnya01/dlc-archive' },
-    { name: 'dlchub-livewire', lang: 'Blade', description: 'Showcase of reusable components and reactivity using the Laravel Livewire framework for efficient frontend-backend data handling in a seamless manner.', tags: ['Laravel', 'Livewire', 'Blade', 'Full Stack'], link: 'https://github.com/Shinnya01/dlchub-livewire' },
-    { name: 'dlchub_attempt3', lang: 'PHP', description: 'An earlier iteration of the DLCHub project, demonstrating continuous development and refinement in core PHP logic and object-oriented architecture.', tags: ['PHP', 'Development Cycle', 'OOP'], link: 'https://github.com/Shinnya01/dlchub_attempt3' },
-    { name: 'dino', lang: 'Unknown', description: 'A simple interactive web game, possibly a clone of the famous Chrome Dino Runner, used for learning vanilla JavaScript game loop logic.', tags: ['JavaScript', 'Game Dev', 'HTML'], link: 'https://github.com/Shinnya01/dino' },
-    { name: 'LATEST-DLCHUB', lang: 'PHP', description: 'A file representing one of the latest attempts at the core DLCHUB application logic.', tags: ['PHP', 'Application Logic'], link: 'https://github.com/Shinnya01/LATEST-DLCHUB' },
-    { name: 'DLC-HUB', lang: 'CSS', description: 'Early work focusing on styling and CSS architecture, potentially related to the DLCHub visual design.', tags: ['CSS', 'Styling', 'UI'], link: 'https://github.com/Shinnya01/DLC-HUB' },
-    { name: 'chatsys', lang: 'CSS', description: 'A project focused on styling the interface for a simple chat system using modern CSS techniques.', tags: ['CSS', 'Chat UI', 'Styling'], link: 'https://github.com/Shinnya01/chatsys' },
-    { name: 'DLCHUB', lang: 'CSS', description: 'Another foundational project focusing on CSS and layout techniques for the main application page.', tags: ['CSS', 'Layout', 'HTML'], link: 'https://github.com/Shinnya01/DLCHUB' },
-    { name: 'practice-react-tailwind', lang: 'JavaScript', description: 'A foundational project used to master the integration of modern React patterns with Tailwind CSS for rapid, utility-first UI development.', tags: ['React', 'Tailwind CSS', 'JavaScript', 'UI/UX'], link: 'https://github.com/Shinnya01/practice-react-tailwind' },
-    { name: 'avcafe', lang: 'PHP', description: 'A project likely related to an audio/video or coffee shop management system, showcasing practical application development in PHP.', tags: ['PHP', 'Management System', 'Backend'], link: 'https://github.com/Shinnya01/avcafe' },
-    { name: 'arduino', lang: 'Unknown', description: 'A repository dedicated to code or resources for Arduino microcontroller projects, highlighting an interest in embedded systems or hardware integration.', tags: ['Arduino', 'Embedded Systems', 'Hardware'], link: 'https://github.com/Shinnya01/arduino' },
-];
-
-// Split projects into featured (top 4-5) and archive (the rest)
-const FEATURED_PROJECTS = ALL_PUBLIC_REPOS.slice(0, 5);
-const ARCHIVE_PROJECTS = ALL_PUBLIC_REPOS.slice(5);
-
-
-const PORTFOLIO_DATA = {
+const PORTFOLIO = {
   name: 'Shinya',
-  title: 'Full Stack Developer | PHP/Laravel & Tailwind CSS',
-  bio: 'A passionate developer focused on robust full-stack solutions. Proficient in crafting scalable backends with PHP (Laravel/Livewire).',
-  skills: [
-    { icon: <Code className="w-6 h-6 text-indigo-500" />, name: 'Frontend', details: 'Tailwind CSS, Blade Templates' },
-    { icon: <Zap className="w-6 h-6 text-green-500" />, name: 'Backend/APIs', details: 'PHP, Laravel, Livewire' },
-    { icon: <Globe className="w-6 h-6 text-red-500" />, name: 'Databases', details: 'MySQL, SQLite' },
-    { icon: <Star className="w-6 h-6 text-yellow-500" />, name: 'Tools/Deployment', details: 'Git, Vercel, Composer, npm/yarn' },
-  ],
-};
+  title: 'Full Stack Developer • PHP/Laravel • Vue/React • Tailwind',
+  bio: `I build practical, production-ready apps — clean UI, solid backend, and deployments that don't break.`,
+  location: 'Philippines',
+  email: 'carreon.carll@gmail.com',
+  github: 'https://github.com/Shinnya01',
+  linkedin: '#', // TODO: put your real LinkedIn link
+}
 
-// --- COMPONENTS ---
+const REPOS: Repo[] = [
+  {
+    name: 'document-scanner',
+    lang: 'Vue',
+    description:
+      'Document scanning + workflow app. Focused on UI, table flows, and real-world CRUD experience.',
+    tags: ['Vue', 'Inertia', 'Laravel', 'UI'],
+    link: 'https://github.com/Shinnya01/document-scanner',
+    featured: true,
+  },
+  {
+    name: 'laravel-vue',
+    lang: 'PHP',
+    description:
+      'Laravel + Vue stack project showcasing backend patterns, controllers, validation, and UI wiring.',
+    tags: ['Laravel', 'Vue', 'PHP', 'Full Stack'],
+    link: 'https://github.com/Shinnya01/laravel-vue',
+    featured: true,
+  },
+  {
+    name: 'mixnmatch',
+    lang: 'TypeScript',
+    description:
+      'TypeScript project exploring app structure, UI composition, and reusable components.',
+    tags: ['TypeScript', 'Frontend', 'UI'],
+    link: 'https://github.com/Shinnya01/mixnmatch',
+    featured: true,
+  },
+  {
+    name: 'task-manager',
+    lang: 'TypeScript',
+    description:
+      'Task management app with modern UI and typical product flows (create, filter, status).',
+    tags: ['TypeScript', 'React/Vue', 'CRUD'],
+    link: 'https://github.com/Shinnya01/task-manager',
+    featured: true,
+  },
+  {
+    name: 'inventory',
+    lang: 'TypeScript',
+    description:
+      'Inventory system project: product listing, management flows, and practical data handling.',
+    tags: ['TypeScript', 'Inventory', 'UI'],
+    link: 'https://github.com/Shinnya01/inventory',
+    featured: true,
+  },
+  {
+    name: 'e-grocery',
+    lang: 'TypeScript',
+    description:
+      'E-grocery style app exploring storefront layout, cart-like flows, and UI patterns.',
+    tags: ['TypeScript', 'E-commerce', 'UI'],
+    link: 'https://github.com/Shinnya01/e-grocery',
+  },
+  {
+    name: 'shoppee-clone-e-commerce',
+    lang: 'TypeScript',
+    description:
+      'Shopee-inspired UI clone focusing on layout, components, and browsing experience.',
+    tags: ['TypeScript', 'E-commerce', 'Clone'],
+    link: 'https://github.com/Shinnya01/shoppee-clone-e-commerce',
+  },
+  {
+    name: 'e-commerce',
+    lang: 'TypeScript',
+    description:
+      'General e-commerce project exploring product pages, lists, and common UX patterns.',
+    tags: ['TypeScript', 'E-commerce', 'Frontend'],
+    link: 'https://github.com/Shinnya01/e-commerce',
+  },
+  {
+    name: 'dlchub-livewire',
+    lang: 'Blade',
+    description:
+      'Livewire project showcasing reactive UI on Laravel without heavy frontend frameworks.',
+    tags: ['Laravel', 'Livewire', 'Blade'],
+    link: 'https://github.com/Shinnya01/dlchub-livewire',
+  },
+  {
+    name: 'dlc-archive',
+    lang: 'Blade',
+    description:
+      'Blade-based UI implementation focusing on templating, layout structure, and views.',
+    tags: ['Laravel', 'Blade', 'UI'],
+    link: 'https://github.com/Shinnya01/dlc-archive',
+  },
+  {
+    name: '7-mini-project_react-laravel',
+    lang: 'TypeScript',
+    description:
+      'Mini projects collection integrating Laravel and modern frontend approaches.',
+    tags: ['Laravel', 'React', 'TypeScript'],
+    link: 'https://github.com/Shinnya01/7-mini-project_react-laravel',
+  },
+  {
+    name: 'simple-pos-system-php',
+    lang: 'PHP',
+    description:
+      'File-based POS system with SQLite — inventory + sales basics in vanilla PHP.',
+    tags: ['PHP', 'SQLite', 'POS', 'Vanilla JS'],
+    link: 'https://github.com/Shinnya01/simple-pos-system-php',
+  },
+  {
+    name: '7task-react',
+    lang: 'TypeScript',
+    description:
+      'Task app highlighting type-safe UI logic and scalable React patterns.',
+    tags: ['React', 'TypeScript', 'Frontend'],
+    link: 'https://github.com/Shinnya01/7task-react',
+  },
+  {
+    name: 'sarisaristore-livewire',
+    lang: 'Blade',
+    description:
+      'Local store management prototype using Livewire reactivity and Blade templating.',
+    tags: ['Laravel', 'Livewire', 'Blade'],
+    link: 'https://github.com/Shinnya01/sarisaristore-livewire',
+  },
+  {
+    name: 'dlchub-laravel-react',
+    lang: 'TypeScript',
+    description:
+      'Full-stack app: Laravel API backend + React/TS frontend for a modern UX.',
+    tags: ['Laravel', 'React', 'TypeScript', 'API'],
+    link: 'https://github.com/Shinnya01/dlchub-laravel-react',
+  },
+  {
+    name: 'dlchub_attempt3',
+    lang: 'PHP',
+    description:
+      'Earlier iteration of DLCHub showing OOP growth and iterative development.',
+    tags: ['PHP', 'OOP'],
+    link: 'https://github.com/Shinnya01/dlchub_attempt3',
+  },
+  {
+    name: 'dino',
+    lang: 'JavaScript',
+    description: 'Simple web game to learn game loop logic and DOM interactions.',
+    tags: ['JavaScript', 'Game'],
+    link: 'https://github.com/Shinnya01/dino',
+  },
+  {
+    name: 'practice-react-tailwind',
+    lang: 'JavaScript',
+    description:
+      'Practice repo for React patterns + Tailwind utility-first UI building.',
+    tags: ['React', 'Tailwind', 'UI'],
+    link: 'https://github.com/Shinnya01/practice-react-tailwind',
+  },
+  {
+    name: 'avcafe',
+    lang: 'PHP',
+    description:
+      'Practical PHP project experimenting with app structure and management system features.',
+    tags: ['PHP', 'Backend'],
+    link: 'https://github.com/Shinnya01/avcafe',
+  },
+  {
+    name: 'arduino',
+    lang: 'C++',
+    description: 'Arduino experiments and microcontroller project resources.',
+    tags: ['Arduino', 'Embedded'],
+    link: 'https://github.com/Shinnya01/arduino',
+  },
+]
+
+const NAV = [
+  { name: 'Home', href: '#home' },
+  { name: 'Skills', href: '#skills' },
+  { name: 'Projects', href: '#projects' },
+  { name: 'Contact', href: '#contact' },
+]
+
+function cn(...classes: Array<string | false | undefined | null>) {
+  return classes.filter(Boolean).join(' ')
+}
+
+function useActiveSection(sectionIds: string[]) {
+  const [active, setActive] = useState(sectionIds[0] ?? 'home')
+
+  useEffect(() => {
+    const els = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[]
+
+    if (!els.length) return
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        // pick the entry with highest intersection ratio
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0))[0]
+        if (visible?.target?.id) setActive(visible.target.id)
+      },
+      { root: null, threshold: [0.2, 0.35, 0.5, 0.65], rootMargin: '-20% 0px -60% 0px' }
+    )
+
+    els.forEach((el) => obs.observe(el))
+    return () => obs.disconnect()
+  }, [sectionIds.join(',')])
+
+  return active
+}
+
+const Pill: React.FC<{ children: React.ReactNode; className?: string }> = ({
+  children,
+  className,
+}) => (
+  <span
+    className={cn(
+      'inline-flex items-center gap-2 rounded-full border border-black/5 bg-white/60 px-3 py-1 text-xs font-medium text-gray-700 shadow-sm backdrop-blur',
+      className
+    )}
+  >
+    {children}
+  </span>
+)
+
+const SectionTitle: React.FC<{ kicker?: string; title: string; subtitle?: string }> = ({
+  kicker,
+  title,
+  subtitle,
+}) => (
+  <div className="mx-auto mb-10 max-w-3xl text-center">
+    {kicker ? (
+      <div className="mb-3 flex justify-center">
+        <Pill className="bg-white/70">{kicker}</Pill>
+      </div>
+    ) : null}
+    <h2 className="text-balance text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+      {title}
+    </h2>
+    {subtitle ? (
+      <p className="mt-3 text-pretty text-base leading-relaxed text-gray-600 sm:text-lg">
+        {subtitle}
+      </p>
+    ) : null}
+  </div>
+)
 
 const Header: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false)
+  const active = useActiveSection(['home', 'skills', 'projects', 'contact'])
 
-  const navItems = [
-    { name: 'Home', href: '#home' },
-    { name: 'Skills', href: '#skills' },
-    { name: 'Featured', href: '#featured-projects' },
-    { name: 'Archive', href: '#project-archive' },
-    { name: 'Contact', href: '#contact' },
-  ];
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-lg transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-        <a href="#home" className="text-2xl font-bold text-gray-900 tracking-tight transition-colors hover:text-indigo-600">
-          {PORTFOLIO_DATA.name}.dev
-        </a>
-        
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex space-x-6">
-          {navItems.map((item) => (
-            <a
-              key={item.name}
-              href={item.href}
-              className="text-gray-600 hover:text-indigo-600 font-medium transition-colors duration-200"
-            >
-              {item.name}
-            </a>
-          ))}
-        </nav>
+    <header className="fixed inset-x-0 top-0 z-50">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mt-4 flex items-center justify-between rounded-2xl border border-black/5 bg-white/75 px-4 py-3 shadow-lg backdrop-blur-md">
+          <a href="#home" className="flex items-center gap-2">
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-indigo-600 to-pink-600 text-white shadow-sm">
+              <Code className="h-5 w-5" />
+            </div>
+            <div className="leading-tight">
+              <div className="text-sm font-semibold text-gray-900">{PORTFOLIO.name}</div>
+              <div className="text-xs text-gray-500">Portfolio</div>
+            </div>
+          </a>
 
-        {/* Mobile Menu Button */}
-        <button
-          className="md:hidden text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle navigation"
-        >
-          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
-      </div>
-
-      {/* Mobile Menu Overlay */}
-      {isOpen && (
-        <div className="md:hidden bg-white shadow-xl">
-          <nav className="px-2 pt-2 pb-4 space-y-1 sm:px-3">
-            {navItems.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-              >
-                {item.name}
-              </a>
-            ))}
+          <nav className="hidden items-center gap-1 md:flex">
+            {NAV.map((item) => {
+              const id = item.href.replace('#', '')
+              const isActive = active === id
+              return (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className={cn(
+                    'rounded-xl px-3 py-2 text-sm font-medium transition',
+                    isActive
+                      ? 'bg-gray-900 text-white shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  )}
+                >
+                  {item.name}
+                </a>
+              )
+            })}
           </nav>
-        </div>
-      )}
-    </header>
-  );
-};
 
-const Hero: React.FC = () => (
-  <section id="home" className="pt-32 pb-24 bg-gray-50 flex items-center min-h-screen">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900">
-        Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-pink-600">Shinya</span>
-      </h1>
-      <p className="mt-4 text-2xl md:text-3xl font-light text-gray-700">
-        {PORTFOLIO_DATA.title}
-      </p>
-      <p className="mt-8 max-w-3xl mx-auto text-xl text-gray-600 leading-relaxed">
-        {PORTFOLIO_DATA.bio}
-      </p>
-      <div className="mt-10 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-        <a
-          href="#featured-projects"
-          className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-full shadow-lg text-white bg-indigo-600 hover:bg-indigo-700 transition-transform duration-200 transform hover:scale-105"
-        >
-          View Featured Work
-          <ArrowRight className="ml-2 h-5 w-5" />
-        </a>
-        <a
-          href="#contact"
-          className="inline-flex items-center justify-center px-8 py-3 border border-indigo-600 text-base font-medium rounded-full shadow-lg text-indigo-600 bg-white hover:bg-indigo-50 transition-transform duration-200 transform hover:scale-105"
-        >
-          Get In Touch
-        </a>
-      </div>
-    </div>
-  </section>
-);
-
-const Skills: React.FC = () => (
-  <section id="skills" className="py-24 bg-white">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 className="text-4xl font-extrabold text-gray-900 text-center mb-16">
-        My Expertise
-      </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        {PORTFOLIO_DATA.skills.map((skill, index) => (
-          <div
-            key={index}
-            className="p-6 bg-gray-50 rounded-xl shadow-xl border border-gray-100 transform hover:scale-[1.02] transition duration-300"
-          >
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="p-3 rounded-full bg-indigo-50">
-                {skill.icon}
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900">{skill.name}</h3>
-            </div>
-            <p className="text-gray-600">{skill.details}</p>
+          <div className="hidden items-center gap-2 md:flex">
+            <a
+              href={PORTFOLIO.github}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-xl border border-black/5 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50"
+            >
+              <span className="inline-flex items-center gap-2">
+                <Github className="h-4 w-4" />
+                GitHub
+              </span>
+            </a>
+            <a
+              href={`mailto:${PORTFOLIO.email}`}
+              className="rounded-xl bg-gray-900 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800"
+            >
+              <span className="inline-flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                Email
+              </span>
+            </a>
           </div>
-        ))}
-      </div>
-    </div>
-  </section>
-);
 
-// --- NEW FEATURED PROJECTS COMPONENT ---
-const FeaturedProjects: React.FC = () => (
-  <section id="featured-projects" className="py-24 bg-gray-50">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 className="text-4xl font-extrabold text-gray-900 text-center mb-4">
-        Featured Work
-      </h2>
-      <p className="text-xl text-gray-600 text-center mb-16 max-w-3xl mx-auto">
-        These are my most comprehensive projects showcasing full-stack application development and technical depth.
-      </p>
-      <div className="space-y-16">
-        {FEATURED_PROJECTS.map((project, index) => (
-          <div
-            key={index}
-            className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} bg-white rounded-2xl shadow-2xl overflow-hidden group`}
+          <button
+            className="md:hidden rounded-xl border border-black/5 bg-white p-2 shadow-sm transition hover:bg-gray-50"
+            onClick={() => setOpen((v) => !v)}
+            aria-label="Toggle menu"
           >
-            {/* Project Image Placeholder */}
-            <div className="lg:w-1/2 h-64 lg:h-auto bg-indigo-100 flex items-center justify-center p-8">
-              <div className="text-indigo-600 text-center">
-                <Layers className="w-12 h-12 mx-auto mb-2" />
-                <p className="font-semibold">{project.name} Mockup</p>
-                <p className="text-sm text-indigo-400">Placeholder Image</p>
-              </div>
-            </div>
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+      </div>
 
-            {/* Project Details */}
-            <div className="lg:w-1/2 p-8 lg:p-12">
-              <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full text-white bg-pink-500 mb-2">{project.lang}</span>
-              <h3 className="text-3xl font-bold text-gray-900">{project.name}</h3>
-              <p className="mt-4 text-lg text-gray-600 leading-relaxed">
-                {project.description}
-              </p>
-              <div className="mt-6 flex flex-wrap gap-2">
-                {project.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-200 text-gray-800"
+      {/* Mobile drawer */}
+      {open ? (
+        <div className="md:hidden">
+          <div
+            className="fixed inset-0 z-40 bg-black/30"
+            onClick={() => setOpen(false)}
+            aria-hidden
+          />
+          <div className="fixed inset-x-0 top-20 z-50 mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="rounded-2xl border border-black/5 bg-white p-3 shadow-xl">
+              <div className="grid gap-1">
+                {NAV.map((item) => (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className="rounded-xl px-3 py-3 text-sm font-medium text-gray-800 hover:bg-gray-100"
                   >
-                    {tag}
-                  </span>
+                    {item.name}
+                  </a>
                 ))}
               </div>
-              <div className="mt-8">
+              <div className="mt-3 grid grid-cols-2 gap-2">
                 <a
-                  href={project.link}
+                  href={PORTFOLIO.github}
                   target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center text-indigo-600 font-semibold text-lg hover:text-pink-600 transition-colors duration-200"
+                  rel="noreferrer"
+                  className="rounded-xl border border-black/5 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm"
                 >
-                  View on GitHub
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  <span className="inline-flex items-center gap-2">
+                    <Github className="h-4 w-4" />
+                    GitHub
+                  </span>
+                </a>
+                <a
+                  href={`mailto:${PORTFOLIO.email}`}
+                  className="rounded-xl bg-gray-900 px-3 py-2 text-sm font-semibold text-white shadow-sm"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    Email
+                  </span>
                 </a>
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ) : null}
+    </header>
+  )
+}
+
+const Hero: React.FC = () => (
+  <section id="home" className="relative overflow-hidden pt-32">
+    {/* background */}
+    <div className="pointer-events-none absolute inset-0">
+      <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-gradient-to-br from-indigo-200 via-pink-200 to-amber-100 blur-3xl opacity-70" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
     </div>
-  </section>
-);
 
-// --- NEW PROJECT ARCHIVE COMPONENT (Compact Grid) ---
-const ProjectArchive: React.FC = () => (
-  <section id="project-archive" className="py-24 bg-white">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 className="text-4xl font-extrabold text-gray-900 text-center mb-4">
-        Project Archive ({ARCHIVE_PROJECTS.length} More)
-      </h2>
-      <p className="text-xl text-gray-600 text-center mb-16 max-w-3xl mx-auto">
-        A collection of older repositories, learning projects, and specific technology deep dives.
-      </p>
+    <div className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-3xl text-center">
+        <div className="flex flex-wrap justify-center gap-2">
+          <Pill>
+            <Zap className="h-4 w-4 text-indigo-600" />
+            Full Stack • Laravel • Vue/React
+          </Pill>
+          <Pill>
+            <Globe className="h-4 w-4 text-pink-600" />
+            {PORTFOLIO.location}
+          </Pill>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {ARCHIVE_PROJECTS.map((project, index) => (
+        <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-6xl">
+          Building clean UIs & robust backends{' '}
+          <span className="bg-gradient-to-r from-indigo-600 to-pink-600 bg-clip-text text-transparent">
+            that ship.
+          </span>
+        </h1>
+
+        <p className="mt-5 text-pretty text-base leading-relaxed text-gray-600 sm:text-lg">
+          {PORTFOLIO.bio}
+        </p>
+
+        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a
-            key={index}
-            href={project.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block p-6 bg-gray-50 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl hover:border-indigo-200 transition duration-300 transform hover:scale-[1.01]"
+            href="#projects"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800 sm:w-auto"
           >
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="text-xl font-bold text-gray-900 group-hover:text-indigo-600">
-                {project.name}
-              </h3>
-              <BookOpen className="w-6 h-6 text-gray-400" />
-            </div>
-            <p className="text-sm text-gray-600 h-12 overflow-hidden">
-              {project.description}
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                {project.lang}
-              </span>
-              {project.tags.slice(0, 2).map((tag) => (
-                  <span
-                      key={tag}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-700"
-                  >
-                      {tag}
-                  </span>
-              ))}
-            </div>
+            View Projects <ArrowRight className="h-4 w-4" />
           </a>
-        ))}
+          <a
+            href={`mailto:${PORTFOLIO.email}`}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white px-5 py-3 text-sm font-semibold text-gray-800 shadow-sm transition hover:bg-gray-50 sm:w-auto"
+          >
+            Contact <Mail className="h-4 w-4" />
+          </a>
+        </div>
+
+        <div className="mt-10 grid grid-cols-3 gap-3 rounded-3xl border border-black/5 bg-white/70 p-4 text-left shadow-sm backdrop-blur sm:gap-4 sm:p-5">
+          <div className="rounded-2xl bg-white p-4 shadow-sm">
+            <div className="text-xs font-medium text-gray-500">Main Stack</div>
+            <div className="mt-1 text-sm font-semibold text-gray-900">Laravel + Vue</div>
+          </div>
+          <div className="rounded-2xl bg-white p-4 shadow-sm">
+            <div className="text-xs font-medium text-gray-500">UI</div>
+            <div className="mt-1 text-sm font-semibold text-gray-900">Tailwind</div>
+          </div>
+          <div className="rounded-2xl bg-white p-4 shadow-sm">
+            <div className="text-xs font-medium text-gray-500">Repos</div>
+            <div className="mt-1 text-sm font-semibold text-gray-900">{REPOS.length}+</div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
-);
+)
 
+const Skills: React.FC = () => {
+  const skills = [
+    {
+      icon: <Code className="h-5 w-5 text-indigo-600" />,
+      title: 'Frontend',
+      body: 'Tailwind CSS, Vue, React, responsive UI, component systems.',
+    },
+    {
+      icon: <Zap className="h-5 w-5 text-emerald-600" />,
+      title: 'Backend / APIs',
+      body: 'Laravel, PHP, validation, jobs/queues, REST APIs.',
+    },
+    {
+      icon: <Globe className="h-5 w-5 text-pink-600" />,
+      title: 'Database',
+      body: 'MySQL, SQLite, migrations, relationships, query optimization.',
+    },
+    {
+      icon: <Star className="h-5 w-5 text-amber-600" />,
+      title: 'Tools / Deployment',
+      body: 'Git, Docker basics, Vercel, Composer, npm.',
+    },
+  ]
+
+  return (
+    <section id="skills" className="bg-white py-16 sm:py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <SectionTitle
+          kicker="Skills"
+          title="What I build with"
+          subtitle="A practical toolkit focused on shipping full-stack apps with clean UI and stable backend behavior."
+        />
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {skills.map((s) => (
+            <div
+              key={s.title}
+              className="group rounded-3xl border border-black/5 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-2xl bg-gray-50 shadow-sm">
+                  {s.icon}
+                </div>
+                <div className="text-base font-semibold text-gray-900">{s.title}</div>
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-gray-600">{s.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+const Projects: React.FC = () => {
+  const [mode, setMode] = useState<'featured' | 'all'>('featured')
+  const [q, setQ] = useState('')
+  const [tag, setTag] = useState<string>('All')
+
+  const allTags = useMemo(() => {
+    const set = new Set<string>()
+    REPOS.forEach((r) => r.tags.forEach((t) => set.add(t)))
+    return ['All', ...Array.from(set).sort((a, b) => a.localeCompare(b))]
+  }, [])
+
+  const shown = useMemo(() => {
+    const base = mode === 'featured' ? REPOS.filter((r) => r.featured) : REPOS
+    const qq = q.trim().toLowerCase()
+
+    return base
+      .filter((r) => {
+        if (tag !== 'All' && !r.tags.includes(tag)) return false
+        if (!qq) return true
+        return (
+          r.name.toLowerCase().includes(qq) ||
+          r.lang.toLowerCase().includes(qq) ||
+          r.description.toLowerCase().includes(qq) ||
+          r.tags.some((t) => t.toLowerCase().includes(qq))
+        )
+      })
+      .sort((a, b) => {
+        // keep featured first when mode=all
+        const af = a.featured ? 1 : 0
+        const bf = b.featured ? 1 : 0
+        if (af !== bf) return bf - af
+        return a.name.localeCompare(b.name)
+      })
+  }, [mode, q, tag])
+
+  return (
+    <section id="projects" className="bg-gray-50 py-16 sm:py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <SectionTitle
+          kicker="Projects"
+          title="Selected work + repo archive"
+          subtitle="Use the search and filters to quickly show the most relevant repos for the role you’re applying for."
+        />
+
+        {/* Controls */}
+        <div className="mx-auto mb-8 max-w-4xl rounded-3xl border border-black/5 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setMode('featured')}
+                className={cn(
+                  'rounded-2xl px-4 py-2 text-sm font-semibold transition',
+                  mode === 'featured'
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                )}
+              >
+                Featured
+              </button>
+              <button
+                onClick={() => setMode('all')}
+                className={cn(
+                  'rounded-2xl px-4 py-2 text-sm font-semibold transition',
+                  mode === 'all'
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                )}
+              >
+                All Repos
+              </button>
+            </div>
+
+            <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:justify-end">
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search (e.g., Laravel, e-commerce, Vue)..."
+                className="w-full rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm outline-none ring-0 transition focus:border-gray-900 sm:max-w-sm"
+              />
+
+              <select
+                value={tag}
+                onChange={(e) => setTag(e.target.value)}
+                className="w-full rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm outline-none transition focus:border-gray-900 sm:w-56"
+              >
+                {allTags.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-3 text-xs text-gray-500">
+            Showing <span className="font-semibold text-gray-900">{shown.length}</span>{' '}
+            repos
+          </div>
+        </div>
+
+        {/* Grid */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {shown.map((repo) => (
+            <a
+              key={repo.name}
+              href={repo.link}
+              target="_blank"
+              rel="noreferrer"
+              className="group rounded-3xl border border-black/5 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="text-base font-semibold text-gray-900 group-hover:text-indigo-600 transition">
+                      {repo.name}
+                    </div>
+                    {repo.featured ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+                        <Star className="h-3.5 w-3.5" /> Featured
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="mt-1 text-xs font-medium text-gray-500">{repo.lang}</div>
+                </div>
+                <BookOpen className="h-5 w-5 text-gray-300 transition group-hover:text-indigo-400" />
+              </div>
+
+              <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-gray-600">
+                {repo.description}
+              </p>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {repo.tags.slice(0, 4).map((t) => (
+                  <span
+                    key={t}
+                    className="rounded-full border border-black/5 bg-gray-50 px-3 py-1 text-[11px] font-medium text-gray-700"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-gray-900">
+                View on GitHub <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
 
 const Contact: React.FC = () => (
-  <section id="contact" className="py-24 bg-white">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
-        Ready to build something great?
-      </h2>
-      <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-10">
-        I'm currently open to new opportunities and collaboration. Let's connect!
-      </p>
-      
-      <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+  <section id="contact" className="bg-white py-16 sm:py-20">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <SectionTitle
+        kicker="Contact"
+        title="Let’s build something"
+        subtitle="Open to opportunities and collaboration. If you like what you see, message me and I’ll reply fast."
+      />
+
+      <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2">
         <a
-          href={`mailto:carreon.carll@gmail.com`} // Update email placeholder
-          className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-lg text-white bg-pink-600 hover:bg-pink-700 transition duration-200 transform hover:scale-105"
+          href={`mailto:${PORTFOLIO.email}`}
+          className="group rounded-3xl border border-black/5 bg-gray-50 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
         >
-          <Mail className="mr-2 h-5 w-5" />
-          Send Me an Email
+          <div className="flex items-center gap-3">
+            <div className="grid h-11 w-11 place-items-center rounded-2xl bg-white shadow-sm">
+              <Mail className="h-5 w-5 text-pink-600" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-gray-900">Email me</div>
+              <div className="text-xs text-gray-600">{PORTFOLIO.email}</div>
+            </div>
+          </div>
+          <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-gray-900">
+            Send message <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+          </div>
+        </a>
+
+        <a
+          href={PORTFOLIO.github}
+          target="_blank"
+          rel="noreferrer"
+          className="group rounded-3xl border border-black/5 bg-gray-50 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+        >
+          <div className="flex items-center gap-3">
+            <div className="grid h-11 w-11 place-items-center rounded-2xl bg-white shadow-sm">
+              <Github className="h-5 w-5 text-gray-900" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-gray-900">GitHub</div>
+              <div className="text-xs text-gray-600">@Shinnya01</div>
+            </div>
+          </div>
+          <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-gray-900">
+            View profile <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+          </div>
+        </a>
+      </div>
+
+      <div className="mx-auto mt-8 flex max-w-4xl flex-wrap justify-center gap-3">
+        <a
+          href={PORTFOLIO.linkedin}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-gray-800 shadow-sm transition hover:bg-gray-50"
+        >
+          <Linkedin className="h-4 w-4" /> LinkedIn
         </a>
         <a
-          href="#" // Add your LinkedIn profile link here
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-full shadow-lg text-gray-700 bg-white hover:bg-gray-50 transition duration-200 transform hover:scale-105"
+          href="#projects"
+          className="inline-flex items-center gap-2 rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800"
         >
-          <Linkedin className="mr-2 h-5 w-5" />
-          LinkedIn
+          Browse projects <ArrowRight className="h-4 w-4" />
         </a>
       </div>
     </div>
   </section>
-);
+)
 
 const Footer: React.FC = () => (
-  <footer className="bg-gray-800 text-white py-10">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center text-center md:text-left">
-      <p className="text-sm mb-4 md:mb-0">
-        &copy; {new Date().getFullYear()} {PORTFOLIO_DATA.name}. Built with Next.js, TypeScript, and Tailwind CSS.
-      </p>
-      <div className="flex space-x-6">
-        <a href="https://github.com/Shinnya01" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-indigo-400 transition-colors" aria-label="GitHub">
-          <Github className="w-6 h-6" />
-        </a>
-        <a href="#" className="text-gray-400 hover:text-indigo-400 transition-colors" aria-label="LinkedIn">
-          <Linkedin className="w-6 h-6" />
-        </a>
-        <a href={`mailto:carreon.carll@gmail.com`} className="text-gray-400 hover:text-indigo-400 transition-colors" aria-label="Email">
-          <Mail className="w-6 h-6" />
-        </a>
+  <footer className="bg-gray-900 py-10 text-white">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col items-center justify-between gap-5 sm:flex-row">
+        <div className="text-center sm:text-left">
+          <div className="text-sm font-semibold">{PORTFOLIO.name}</div>
+          <div className="text-xs text-white/70">
+            Built with Next.js + Tailwind • © {new Date().getFullYear()}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <a
+            href={PORTFOLIO.github}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-2xl bg-white/10 p-2 transition hover:bg-white/15"
+            aria-label="GitHub"
+          >
+            <Github className="h-5 w-5" />
+          </a>
+          <a
+            href={PORTFOLIO.linkedin}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-2xl bg-white/10 p-2 transition hover:bg-white/15"
+            aria-label="LinkedIn"
+          >
+            <Linkedin className="h-5 w-5" />
+          </a>
+          <a
+            href={`mailto:${PORTFOLIO.email}`}
+            className="rounded-2xl bg-white/10 p-2 transition hover:bg-white/15"
+            aria-label="Email"
+          >
+            <Mail className="h-5 w-5" />
+          </a>
+        </div>
       </div>
     </div>
   </footer>
-);
+)
 
-// --- MAIN PAGE COMPONENT ---
-const Page: React.FC = () => {
+export default function Page() {
   return (
-    <div className="min-h-screen bg-white font-inter">
-      {/* Scroll-smooth class added to the root element for pleasant navigation */}
-      <style jsx global>{`
-        html {
-          scroll-behavior: smooth;
-        }
-      `}</style>
+    <div className="min-h-screen bg-white text-gray-900">
       <Header />
       <main>
         <Hero />
         <Skills />
-        <FeaturedProjects />
-        <ProjectArchive />
+        <Projects />
         <Contact />
       </main>
       <Footer />
     </div>
-  );
-};
-
-export default Page;
+  )
+}
