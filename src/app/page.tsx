@@ -25,7 +25,7 @@ type Repo = {
 }
 
 const PORTFOLIO = {
-  name: 'Shinya',
+  name: 'Carl Justin Carreon',
   title: 'Full Stack Developer • PHP/Laravel • Vue/React • Tailwind',
   bio: `I build practical, production-ready apps — clean UI, solid backend, and deployments that don't break.`,
   location: 'Philippines',
